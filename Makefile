@@ -6,6 +6,6 @@ fmt:
 	goimports -w .
 
 bench: build
-	go test -bench=. github.com/hugoArregui/julia-sets/internal/julia
+	go test -bench=. github.com/hugoArregui/complex-analysis/internal/julia
 
 .PHONY: build fmt

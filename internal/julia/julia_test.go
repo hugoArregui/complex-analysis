@@ -6,9 +6,6 @@ import (
 	"github.com/fogleman/gg"
 )
 
-// BenchmarkFullDrawJulia-8   	       1	3782568577 ns/op
-// ok  	github.com/hugoArregui/julia-sets/internal/julia	3.785s
-
 func BenchmarkFullDrawJulia(b *testing.B) {
 	dc := gg.NewContext(1000, 1000)
 	p := Parameters{

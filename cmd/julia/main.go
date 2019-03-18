@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/fogleman/gg"
-	"github.com/hugoArregui/julia-sets/internal/julia"
+	"github.com/hugoArregui/complex-analysis/internal/julia"
 )
 
 func main() {
