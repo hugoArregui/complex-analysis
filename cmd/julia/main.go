@@ -7,6 +7,7 @@ import (
 
 func main() {
 	dc := gg.NewContext(1000, 1000)
+
 	p := julia.Parameters{
 		C:       complex(1.0/4.0, 0),
 		MaxIter: 1000,
