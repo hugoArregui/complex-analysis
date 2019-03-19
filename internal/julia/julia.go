@@ -1,11 +1,12 @@
 package julia
 
 import (
+	"image"
+	"image/color"
 	"math"
 	"math/cmplx"
+	"math/rand"
 	"sync"
-
-	"github.com/fogleman/gg"
 )
 
 type Parameters struct {
@@ -14,6 +15,7 @@ type Parameters struct {
 	XMin, XMax float64
 	YMin, YMax float64
 	r          float64
+	colors     []color.Color
 }
 
 type region struct {
@@ -21,9 +23,10 @@ type region struct {
 	YMin, YMax int
 }
 
-func drawRegion(dc *gg.Context, p Parameters, region region) {
-	kx := (p.XMax - p.XMin) / float64(dc.Width())
-	ky := (p.YMax - p.YMin) / float64(dc.Height())
+func drawRegion(im *image.RGBA, p Parameters, region region) {
+	size := im.Bounds().Size()
+	kx := (p.XMax - p.XMin) / float64(size.X)
+	ky := (p.YMax - p.YMin) / float64(size.Y)
 
 	for j := region.YMin; j < region.YMax; j++ {
 		y := p.YMin + float64(j)*ky
@@ -31,37 +34,51 @@ func drawRegion(dc *gg.Context, p Parameters, region region) {
 			x := p.XMin + float64(i)*kx
 			z := complex(x, y)
 
+			toInf := false
 			for n := 0; n < p.MaxIter; n++ {
 				z0 := cmplx.Pow(z, 2) + p.C
 
 				if cmplx.Abs(z0) > p.r {
-					dc.SetPixel(i, j)
+					toInf = true
+					im.Set(i, j, p.colors[n])
 					break
 				}
 
 				z = z0
 			}
 
+			if !toInf {
+				im.Set(i, j, color.Black)
+			}
 		}
 	}
 }
 
-func DrawJuliaSet(dc *gg.Context, p Parameters) {
+func DrawJuliaSet(im *image.RGBA, p Parameters) {
 	p.r = 1 + math.Sqrt(1+4*cmplx.Abs(p.C))
+	splitX := 2
+	splitY := 2
 
-	dc.SetRGB(0, 0, 0)
-	dc.Clear()
+	p.colors = make([]color.Color, p.MaxIter)
 
-	dc.SetRGB(1, 1, 1)
+	for colorIndex := 0; colorIndex < p.MaxIter; colorIndex++ {
+		c := color.RGBA{
+			R: uint8(rand.Intn(256)),
+			G: uint8(rand.Intn(256)),
+			B: uint8(rand.Intn(256)),
+			A: 255,
+		}
 
-	splitX := 4
-	splitY := 4
+		p.colors[colorIndex] = c
+	}
+
 	var wg sync.WaitGroup
 	wg.Add(splitX * splitY)
 
 	// TODO this won't work if with or height are not divisible by their split
-	regionWidth := dc.Width() / splitX
-	regionHeight := dc.Height() / splitY
+	size := im.Bounds().Size()
+	regionWidth := size.X / splitX
+	regionHeight := size.Y / splitY
 	for regionX := 0; regionX < splitX; regionX++ {
 		for regionY := 0; regionY < splitY; regionY++ {
 			r := region{}
@@ -71,12 +88,11 @@ func DrawJuliaSet(dc *gg.Context, p Parameters) {
 			r.YMax = r.YMin + regionHeight
 
 			go func() {
-				drawRegion(dc, p, r)
+				drawRegion(im, p, r)
 				wg.Done()
 			}()
 		}
 	}
 
 	wg.Wait()
-	dc.Fill()
 }

@@ -2,14 +2,13 @@ package julia
 
 import (
 	"testing"
-
-	"github.com/fogleman/gg"
+	"image"
 )
 
 func BenchmarkFullDrawJulia(b *testing.B) {
-	dc := gg.NewContext(1000, 1000)
+	im := image.NewRGBA(image.Rect(0, 0, 1000, 1000))
 	p := Parameters{
-		C:       complex(1.0/4.0, 0),
+		C:       complex(0.25, 0),
 		MaxIter: 1000,
 		XMin:    -5.0,
 		XMax:    5.0,
@@ -17,14 +16,14 @@ func BenchmarkFullDrawJulia(b *testing.B) {
 		YMax:    5.0,
 	}
 	for i := 0; i < b.N; i++ {
-		DrawJuliaSet(dc, p)
+		DrawJuliaSet(im, p)
 	}
 }
 
 func BenchmarkFullExpensiveDrawJulia(b *testing.B) {
-	dc := gg.NewContext(1000, 1000)
+	im := image.NewRGBA(image.Rect(0, 0, 1000, 1000))
 	p := Parameters{
-		C:       complex(1.0/4.0, 0),
+		C:       complex(0.25, 0),
 		MaxIter: 1000,
 		XMin:    -1.0,
 		XMax:    1.0,
@@ -32,6 +31,6 @@ func BenchmarkFullExpensiveDrawJulia(b *testing.B) {
 		YMax:    1.0,
 	}
 	for i := 0; i < b.N; i++ {
-		DrawJuliaSet(dc, p)
+		DrawJuliaSet(im, p)
 	}
 }
