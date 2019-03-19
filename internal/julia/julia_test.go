@@ -1,8 +1,8 @@
 package julia
 
 import (
-	"testing"
 	"image"
+	"testing"
 )
 
 func BenchmarkFullDrawJulia(b *testing.B) {

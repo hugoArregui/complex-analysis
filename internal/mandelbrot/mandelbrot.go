@@ -1,20 +1,17 @@
-package julia
+package mandelbrot
 
 import (
 	"image"
 	"image/color"
-	"math"
 	"math/cmplx"
 	"math/rand"
 	"sync"
 )
 
 type Parameters struct {
-	C          complex128
 	MaxIter    int
 	XMin, XMax float64
 	YMin, YMax float64
-	r          float64
 	colors     []color.Color
 }
 
@@ -27,18 +24,18 @@ func drawRegion(im *image.RGBA, p Parameters, region region) {
 	size := im.Bounds().Size()
 	kx := (p.XMax - p.XMin) / float64(size.X)
 	ky := (p.YMax - p.YMin) / float64(size.Y)
-
 	for j := region.YMin; j < region.YMax; j++ {
 		y := p.YMin + float64(j)*ky
 		for i := region.XMin; i < region.XMax; i++ {
 			x := p.XMin + float64(i)*kx
-			z := complex(x, y)
+			c := complex(x, y)
 
+			z := complex(0, 0)
 			toInf := false
 			for n := 0; n < p.MaxIter; n++ {
-				z0 := cmplx.Pow(z, 2) + p.C
+				z0 := cmplx.Pow(z, 2) + c
 
-				if cmplx.Abs(z0) > p.r {
+				if cmplx.Abs(z0) > 2 {
 					toInf = true
 					im.Set(i, j, p.colors[n])
 					break
@@ -55,7 +52,6 @@ func drawRegion(im *image.RGBA, p Parameters, region region) {
 }
 
 func Draw(im *image.RGBA, p Parameters) {
-	p.r = 1 + math.Sqrt(1+4*cmplx.Abs(p.C))
 	splitX := 2
 	splitY := 2
 
